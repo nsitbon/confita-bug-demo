@@ -13,13 +13,18 @@ import (
 // lowercase letters to uppercase.
 func NewBackend() backend.Backend {
 	return backend.Func("env", func(ctx context.Context, key string) ([]byte, error) {
-		if val := os.Getenv(key); val != "" {
+		val, ok := os.LookupEnv(key)
+		if ok {
 			return []byte(val), nil
 		}
+
 		key = strings.Replace(strings.ToUpper(key), "-", "_", -1)
-		if val := os.Getenv(key); val != "" {
+
+		val, ok = os.LookupEnv(key)
+		if ok {
 			return []byte(val), nil
 		}
+
 		return nil, backend.ErrNotFound
 	})
 }

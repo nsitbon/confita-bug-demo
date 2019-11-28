@@ -129,17 +129,6 @@ func (l *Loader) parseStruct(ref reflect.Value) *StructConfig {
 			for _, opt := range opts {
 				if opt == "required" {
 					f.Required = true
-					continue
-				}
-
-				if strings.HasPrefix(opt, "short=") {
-					f.Short = opt[len("short="):]
-					continue
-				}
-
-				if strings.HasPrefix(opt, "description=") {
-					f.Description = opt[len("description="):]
-					continue
 				}
 
 				if strings.HasPrefix(opt, "backend=") {
@@ -178,10 +167,6 @@ func (l *Loader) resolve(ctx context.Context, s *StructConfig) error {
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-		}
-
-		if len(foundFields) == len(s.Fields) {
-			break
 		}
 
 		if u, ok := b.(Unmarshaler); ok {
@@ -247,14 +232,12 @@ type StructConfig struct {
 
 // FieldConfig holds informations about a struct field.
 type FieldConfig struct {
-	Name        string
-	Short       string
-	Key         string
-	Description string
-	Value       reflect.Value
-	Default     reflect.Value
-	Required    bool
-	Backend     string
+	Name     string
+	Key      string
+	Value    reflect.Value
+	Default  reflect.Value
+	Required bool
+	Backend  string
 }
 
 // Set converts data into f.Value.

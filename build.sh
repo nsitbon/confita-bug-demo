@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-docker build -t confita-bug-demo:v0.9.0 .
+docker build -t confita-bug-demo:v0.7.0 .

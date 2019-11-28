@@ -3,7 +3,6 @@ package flags
 import (
 	"context"
 	"flag"
-	"fmt"
 	"reflect"
 	"time"
 
@@ -33,75 +32,52 @@ func (b *Backend) LoadStruct(ctx context.Context, cfg *confita.StructConfig) err
 		k := f.Value.Kind()
 		switch {
 		case f.Value.Type().String() == "time.Duration":
-			var val time.Duration
-			flag.DurationVar(&val, f.Key, time.Duration(f.Default.Int()), f.Description)
-			if f.Short != "" {
-				flag.DurationVar(&val, f.Short, time.Duration(f.Default.Int()), shortDesc(f.Description))
-			}
+			// define the flag and its default value
+			v := flag.Duration(f.Key, time.Duration(f.Default.Int()), "")
 			// this function must be executed after the flag.Parse call.
 			defer func() {
 				// if the user has set the flag, save the value in the field.
-				if isFlagSet(f) {
-					f.Value.SetInt(int64(val))
+				if isFlagSet(f.Key) {
+					f.Value.SetInt(int64(*v))
 				}
 			}()
 		case k == reflect.Bool:
-			var val bool
-			flag.BoolVar(&val, f.Key, f.Default.Bool(), f.Description)
-			if f.Short != "" {
-				flag.BoolVar(&val, f.Short, f.Default.Bool(), shortDesc(f.Description))
-			}
+			v := flag.Bool(f.Key, f.Default.Bool(), "")
 			defer func() {
-				if isFlagSet(f) {
-					f.Value.SetBool(val)
+				if isFlagSet(f.Key) {
+					f.Value.SetBool(*v)
 				}
 			}()
 		case k >= reflect.Int && k <= reflect.Int64:
-			var val int
-			flag.IntVar(&val, f.Key, int(f.Default.Int()), f.Description)
-			if f.Short != "" {
-				flag.IntVar(&val, f.Short, int(f.Default.Int()), shortDesc(f.Description))
-			}
+			v := flag.Int(f.Key, int(f.Default.Int()), "")
 			defer func() {
-				if isFlagSet(f) {
-					f.Value.SetInt(int64(val))
+				if isFlagSet(f.Key) {
+					f.Value.SetInt(int64(*v))
 				}
 			}()
 		case k >= reflect.Uint && k <= reflect.Uint64:
-			var val uint64
-			flag.Uint64Var(&val, f.Key, f.Default.Uint(), f.Description)
-			if f.Short != "" {
-				flag.Uint64Var(&val, f.Short, f.Default.Uint(), shortDesc(f.Description))
-			}
+			v := flag.Uint(f.Key, uint(f.Default.Uint()), "")
 			defer func() {
-				if isFlagSet(f) {
-					f.Value.SetUint(val)
+				if isFlagSet(f.Key) {
+					f.Value.SetUint(uint64(*v))
 				}
 			}()
 		case k >= reflect.Float32 && k <= reflect.Float64:
-			var val float64
-			flag.Float64Var(&val, f.Key, f.Default.Float(), f.Description)
-			if f.Short != "" {
-				flag.Float64Var(&val, f.Short, f.Default.Float(), shortDesc(f.Description))
-			}
+			v := flag.Float64(f.Key, f.Default.Float(), "")
 			defer func() {
-				if isFlagSet(f) {
-					f.Value.SetFloat(val)
+				if isFlagSet(f.Key) {
+					f.Value.SetFloat(*v)
 				}
 			}()
 		case k == reflect.String:
-			var val string
-			flag.StringVar(&val, f.Key, f.Default.String(), f.Description)
-			if f.Short != "" {
-				flag.StringVar(&val, f.Short, f.Default.String(), shortDesc(f.Description))
-			}
+			v := flag.String(f.Key, f.Default.String(), "")
 			defer func() {
-				if isFlagSet(f) {
-					f.Value.SetString(val)
+				if isFlagSet(f.Key) {
+					f.Value.SetString(*v)
 				}
 			}()
 		default:
-			flag.Var(&flagValue{f}, f.Key, f.Description)
+			flag.Var(&flagValue{f}, f.Key, "")
 		}
 	}
 
@@ -136,14 +112,10 @@ func (b *Backend) Name() string {
 	return "flags"
 }
 
-func shortDesc(description string) string {
-	return fmt.Sprintf("%s (short)", description)
-}
+func isFlagSet(name string) bool {
+	flagset := make(map[string]bool)
+	flag.Visit(func(f *flag.Flag) { flagset[f.Name] = true })
 
-func isFlagSet(config *confita.FieldConfig) bool {
-	flagset := make(map[*confita.FieldConfig]bool)
-	flag.Visit(func(f *flag.Flag) { flagset[config] = true })
-
-	_, ok := flagset[config]
+	_, ok := flagset[name]
 	return ok
 }
