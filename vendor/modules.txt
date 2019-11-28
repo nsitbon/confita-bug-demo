@@ -1,0 +1,7 @@
+# github.com/heetch/confita v0.9.0
+github.com/heetch/confita
+github.com/heetch/confita/backend
+github.com/heetch/confita/backend/env
+github.com/heetch/confita/backend/flags
+# github.com/pkg/errors v0.8.1
+github.com/pkg/errors
